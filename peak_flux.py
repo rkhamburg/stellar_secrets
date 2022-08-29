@@ -8,7 +8,7 @@ from astro_calc import peak_flux, detect_grbs
 from plotting import *
 
 def GRB_Simulation(x, z0, l0, l1=None, l2=None, l3=None, z1=None, z2=None,
-    z3=None, verbose=False, plot=True):
+    z3=None):
     """
     Description needed.
     """
@@ -56,6 +56,7 @@ def GRB_Simulation(x, z0, l0, l1=None, l2=None, l3=None, z1=None, z2=None,
     model_counts[model_counts==0] = 1e-30
 
     # Print info about detections
+    verbose = False
     if verbose is not False:
         print_info(model_counts, grb_yr)
     ''' Plot intrinsic and detected distributions '''
