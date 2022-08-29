@@ -48,19 +48,20 @@ def GRB_Simulation(x, z0, l0, l1=None, l2=None, l3=None, z1=None, z2=None,
     pf_50_300 = peak_flux(lsample, zsample, dl_sample, corr_50_300)
 
     # Detect GRBs
-    det_pf, det_pf_50_300 = detect_grbs(pf, kind='gbm', pf_50_300=pf_50_300,
-        func=func)
+    det_pf, _, _, det_lum = detect_grbs(pf, kind='gbm', pf_50_300=pf_50_300,
+        func=func, z=zsample, L=lsample)
 
     # Get expected rate of detected GRBs
-    model_counts = get_model_counts(det_pf, grb_yr, sim_num, type='peakflux')
-    model_counts[model_counts==0] = 1e-30
+    pf_counts  = get_model_counts(det_pf, grb_yr, sim_num, type='peakflux')
+    lum_counts = get_model_counts(det_lum, grb_yr, sim_num, type='luminosity')
+    pf_counts[pf_counts==0]   = 1e-30
+    lum_counts[lum_counts==0] = 1e-30
 
     # Print info about detections
     verbose = False
     if verbose is not False:
-        print_info(model_counts, grb_yr)
-    ''' Plot intrinsic and detected distributions '''
-    return model_counts
+        print_info(pf_counts, grb_yr)
+    return np.array([pf_counts, lum_counts], dtype=object)
 
 def print_info(detection_hist, grb_yr):
     fov, livetime = get_instr_info('gbm')
@@ -127,8 +128,12 @@ def get_redshift_samples(z, dV, Ndraws, z0, z1=None, z2=None, z3=None, \
 def get_model_counts(dist, grb_yr, sim_num, type='peakflux', instrument='gbm'):
     d = np.histogram(dist, bins=get_bins(type))[0]
     d = d / np.sum(d)
-    fov, livetime = get_instr_info(instrument)
-    return grb_yr * fov * livetime * (len(dist)/sim_num) * d
+    if type == 'peakflux':
+        fov, livetime = get_instr_info(instrument)
+        return grb_yr * fov * livetime * (len(dist)/sim_num) * d
+    if type == 'luminosity':
+        zrate = 10.
+        return zrate * d
 
 def get_instr_info(d):
     if d == 'gbm':

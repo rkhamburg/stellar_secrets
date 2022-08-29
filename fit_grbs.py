@@ -21,8 +21,6 @@ from priors import make_prior
 class PoissonLikelihood(bilby.core.likelihood.Analytical1DLikelihood):
     def __init__(self, x, y, func):
         """
-        NOTE: Taken from bilby class.
-
         A simple Poisson likelihood
 
         Parameters
@@ -51,16 +49,18 @@ class PoissonLikelihood(bilby.core.likelihood.Analytical1DLikelihood):
                 "Poisson rate function returns wrong value type! "
                 "Is {} when it should be numpy.ndarray".format(type(rate)))
         # Check for negative values
-        elif np.any(rate < 0):
+        elif np.any(rate[0] < 0) or np.any(rate[1] < 0):
             raise ValueError(("Poisson rate function returns a negative",
                               " value!"))
         # Check for nan values
-        elif np.any(np.isnan(rate)==True):
+        elif np.any(np.isnan(rate[0])==True) or np.any(np.isnan(rate[1])==True):
             return -np.inf
         # Return likelihood
         else:
-            return np.sum(-rate + self.y*np.log(rate)
-                            - gammaln(self.y + 1))
+            return np.sum(-rate[0] + self.y[0]*np.log(rate[0]) \
+                    - gammaln(self.y[0] + 1)) \
+                 + np.sum(-rate[1] + self.y[1]*np.log(rate[1]) \
+                    - gammaln(self.y[1] + 1))
 
     def __repr__(self):
         return bilby.core.likelihood.Analytical1DLikelihood.__repr__(self)
@@ -75,7 +75,7 @@ class PoissonLikelihood(bilby.core.likelihood.Analytical1DLikelihood):
         if not isinstance(y, np.ndarray):
             y = np.array([y], dtype='object')
         # check array is a non-negative array
-        if np.any(y < 0) or np.any(y < 0):
+        if np.any(y[0] < 0) or np.any(y[1] < 0):
             raise ValueError("Data must be non-negative")
         self.__y = y
 
@@ -157,10 +157,12 @@ if args.sim is not False:
                             **injection_parameters
     )
 else:
-    gbm_pf_file = paths.get('t90_file')
-    data = get_data(gbm_pf_file, type='long')[1]
-    #lum_data = get_luminosity_data(rest_frame_file, t90_file=t90_file, type='long')
-    #data = np.array([pf_data, lum_data], dtype='object')
+    gbm_pf_file     = paths.get('t90_file')
+    luminosity_file = paths.get('rest_frame_file')
+    pf_data = get_data(gbm_pf_file, type='long')[1]
+    lum_data = get_luminosity_data(luminosity_file, t90_file=gbm_pf_file,
+        type='long')
+    data = np.array([pf_data, lum_data], dtype=object)
 
 # Plot data
 if args.plot is not False:

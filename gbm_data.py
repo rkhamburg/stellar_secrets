@@ -5,7 +5,7 @@ from plotting import get_bins
 def get_data(filename, column='flux_1024', type='all', data_type='peakflux'):
 
     # Read data from file
-    data = read_data(filename, column=column, type=type)
+    data  = read_data(filename, column=column, type=type)
 
     # Get histogram counts from data
     data_counts = get_data_counts(data, data_type=data_type)
@@ -13,6 +13,32 @@ def get_data(filename, column='flux_1024', type='all', data_type='peakflux'):
 
     return data, data_counts
 
+
+def get_luminosity_data(filename, t90_file=None, type='all'):
+    # Read file with rest-frame parameters
+    luminosity_file = ascii.read(filename)
+    
+    # Read GBM trigger file
+    if type != 'all':
+        gbm_triggers = read_data(t90_file, type=type, column='name')
+        gbm_triggers = [int(grb[3:]) for grb in gbm_triggers]
+    else:
+        gbm_triggers = luminosity_file["col2"]
+
+    # Grab luminosities
+    luminosities = []
+    for line in luminosity_file:
+        if line[1] in gbm_triggers:
+            if type == 'long' and line[1] != 170817529:
+                luminosities.append(line["col13"])
+            elif type == 'short' or type == 'all':
+                luminosities.append(line["col13"])
+        if type == 'short' and line[1] == 170817529:
+            luminosities.append(line["col13"])
+
+    # Histogram the luminosities
+    #print (len(luminosities))
+    return np.histogram(luminosities, bins=get_bins('luminosity'))[0]
 
 
 def read_data(filename, type='all', column='flux_1024'):
