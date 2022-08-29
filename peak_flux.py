@@ -48,7 +48,8 @@ def GRB_Simulation(x, z0, l0, l1=None, l2=None, l3=None, z1=None, z2=None,
     pf_50_300 = peak_flux(lsample, zsample, dl_sample, corr_50_300)
 
     # Detect GRBs
-    det_pf, det_pf_50_300 = detect_grbs(pf, kind='gbm', pf_50_300=pf, func=func)
+    det_pf, det_pf_50_300 = detect_grbs(pf, kind='gbm', pf_50_300=pf_50_300,
+        func=func)
 
     # Get expected rate of detected GRBs
     model_counts = get_model_counts(det_pf, grb_yr, sim_num, type='peakflux')
