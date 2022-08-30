@@ -81,6 +81,8 @@ class PoissonLikelihood(bilby.core.likelihood.Analytical1DLikelihood):
 
 
 parser = argparse.ArgumentParser()
+parser.add_argument('-c', default='CBC.ini', \
+                    help="path to ini file")
 parser.add_argument('--sim', type=bool, default=False, \
                     help='injection simulations')
 parser.add_argument('-l', default='SPL', \
@@ -101,7 +103,7 @@ args = parser.parse_args()
 
 # Get configuration
 config = ConfigParser()
-config.read('CBC.ini')
+config.read(args.c)
 paths = config['paths']
 names = config['names']
 options = config['options']
