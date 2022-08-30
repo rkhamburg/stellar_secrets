@@ -99,6 +99,7 @@ parser.add_argument('--nlive', type=int, default=1000,\
                     help='Number of live points')
 parser.add_argument('--plot', type=bool, default=False,
                     help='boolean to plot data')
+parser.add_argument('--label', default=None, help='label for output files')
 args = parser.parse_args()
 
 # Get configuration
@@ -110,7 +111,10 @@ options = config['options']
 
 # Specify the output directory and name of the simulation
 outdir = names.get('outdir')
-label = names.get('label')
+if args.label is None:
+    label = names.get('label')
+else:
+    label = args.label
 bilby.core.utils.setup_logger(outdir=outdir, label=label)
 
 # Set simulation number
