@@ -173,8 +173,6 @@ def get_redshift_samples(z, dV, Ndraws, z0, z1=None, z2=None, z3=None,
 
 def get_model_counts(dist, grb_yr, sim_num, type='peakflux', instrument='gbm'):
     d = np.histogram(dist, bins=get_bins(type))[0]
-    print (d)
-    print (np.sum(d))
     d = d / np.sum(d)
 
     if type == 'peakflux':
