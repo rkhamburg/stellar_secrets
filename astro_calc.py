@@ -16,9 +16,9 @@ def diff_comoving_volume(z):
     dV_dz_Gpc3 = dV_dzdOm.to(u.Gpc**3 / u.sr)
     return dV_dz_Gpc3.value
 
-def peak_flux(L, z, dl, corr):
+def peak_flux(L, dl, corr):
     # 4 * pi = 12.566
-    return (1+z) * (L*corr) / (12.566 * dl * dl)
+    return (L*corr) / (12.566 * dl * dl)# (1+z) *
 
 def detect_grbs(pf, kind='sim', pf_50_300=None, func=None, z=None, L=None, \
     threshold=None):

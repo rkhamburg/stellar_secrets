@@ -166,7 +166,7 @@ class Luminosity():
 
 
 class Redshift():
-    def __init__(self, z, r0, r1=None, r2=None, r3=None, name=None):
+    def __init__(self, z, r0, r1=None, r2=None, r3=None, name=None, mrate=None):
         """
         Parameters
         ----------
@@ -179,6 +179,7 @@ class Redshift():
         self.r3 = r3
         self.z = z
         self.f = name
+        self.merger_rate = mrate
         return
 
     def set_redshift_function(self):
@@ -186,6 +187,8 @@ class Redshift():
             return self.MadauFragos2017()
         elif self.f == 'WP':
             return self.WP2010()
+        elif self.f == 'BNS':
+            return self.merger_rate
 
     def HopkinsBeacom2006(self):
         return (0.7 * (0.017 + 0.13*self.z)) / (1 + (self.z/3.3)**5.3)
@@ -253,7 +256,7 @@ class Redshift():
           lambda z: self.r0 * ((1+self.r3)**(self.r1-self.r2)) * (1+z)**self.r2])
 
 
-    def source_rate_density(self, dV, merger_rate=None):
+    def source_rate_density(self, dV):
         """ Calculates observed GRB redshift distribution
 
         Parameters:
@@ -262,15 +265,11 @@ class Redshift():
             list or np array of redshifts
 
         Returns:
-        rate_pdf:
+        rate_pdf
         """
         # GRB Rate Density [Gpc^-3 yr^-1]
-        if merger_rate is None:
-            rgrb = self.set_redshift_function()
-            rgrb = self.r0 * rgrb / rgrb[0]
-            #rgrb = self.WP2010()
-        else:
-            rgrb = self.r0 * merger_rate / merger_rate[0]
+        rgrb = self.set_redshift_function()
+        rgrb = self.r0 * rgrb / rgrb[0]
         #self.plot_intrinsic_rate(rgrb)
 
         # Redshift Distribution

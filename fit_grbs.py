@@ -16,7 +16,7 @@ from astro_calc import *
 from peak_flux import GRB_Simulation
 from gbm_data import *
 from plotting import plot_data
-from priors import make_prior
+from priors import make_prior_joint
 
 class PoissonLikelihood(bilby.core.likelihood.Analytical1DLikelihood):
     def __init__(self, x, y, func):
@@ -85,6 +85,8 @@ parser.add_argument('--sim', type=bool, default=False, \
                     help='injection simulations')
 parser.add_argument('-l', default='SPL', \
                     help="luminosity function: 'SPL', 'CPL', or 'BPL'")
+parser.add_argument('-l2', default='SPL', \
+                    help="luminosity function: 'SPL', 'CPL', or 'BPL'")
 parser.add_argument('--run', type=bool, default=False, \
                     help='option to run nested sampler')
 parser.add_argument('-z', default='SFR', \
@@ -111,78 +113,101 @@ bilby.core.utils.setup_logger(outdir=outdir, label=label)
 
 # Set simulation number
 NGRB = options.getfloat('NGRB')
+
 # Set redshift domain
 minz = options.getfloat('minz')
 maxz = options.getfloat('maxz')
 redshifts = np.logspace(minz, maxz, 10000)
+
 # Set luminosity domain
 minl = options.getfloat('minl')
 maxl = options.getfloat('maxl')
-luminosities = np.logspace(minl, maxl, 10000)
+minl_merg = options.getfloat('minl_merg')
+maxl_merg = options.getfloat('maxl_merg')
+coll_lum = np.logspace(minl, maxl, 10000)
+merg_lum = np.logspace(minl_merg, maxl_merg, 10000)
+luminosities = np.array([coll_lum, merg_lum])
 
 # Get distance luminosities and co-moving volument elements
 dl_cm = distance_luminosity(redshifts)
 dV_dz_Gpc3 = diff_comoving_volume(redshifts)
 
 # Load GBM detection threshold files
-gbm_det_prob = paths.get('gbm_1s')
+''' CHECK WHICH TIMESCALE BEING USED '''
+gbm_det_prob = paths.get('gbm_1s_all')
 f = ascii.read(gbm_det_prob, header_start=0)
 func = interp1d(f["Flux"], f["Probability"], bounds_error=False, \
         fill_value=(0,1))
 
 # GBM Detector Correction files
-gbm_corr_10_1000 = paths.get('gbm_corr')
-gbm_corr_50_300 = paths.get('gbm_corr2')
-pf_correction = np.load(gbm_corr_10_1000)
-pf_correction_50_300 = np.load(gbm_corr_50_300)
+gbm_corr_10_1000      = paths.get('gbm_corr')
+gbm_corr_50_300       = paths.get('gbm_corr_50_300')
+gbm_corr_merg_10_1000 = paths.get('gbm_corr_merg')
+gbm_corr_merg_50_300  = paths.get('gbm_corr_merg_50_300')
+collapsar_correction        = np.load(gbm_corr_10_1000)
+collapsar_correction_50_300 = np.load(gbm_corr_50_300)
+merger_correction           = np.load(gbm_corr_merg_10_1000)
+merger_correction_50_300    = np.load(gbm_corr_merg_50_300)
 
 # Get injection parameters
 keys = [p for p in options['parameter_labels'].split(',')]
 values = [float(p) for p in options['parameter_injections'].split(',')]
 injection_parameters = dict(zip(keys, values))
 
+#from source_distributions import Redshift
+#M = Redshift(redshifts, None)
+#merger_rate = M.merger_rate_density(cosmo, save=True)
+merger_rate = paths.get('merger_rate')
+merger_rate = np.load(merger_rate)
+
 # Generate injected data or read in real GBM data
-merger_rate = None
 if args.sim is not False:
     data = GRB_Simulation([redshifts,
                             luminosities,
-                            pf_correction,
-                            pf_correction_50_300,
+                            collapsar_correction,
+                            collapsar_correction_50_300,
+                            merger_correction,
+                            merger_correction_50_300,
                             func,
                             dl_cm,
                             dV_dz_Gpc3,
                             merger_rate,
                             NGRB,
-                            args.l, args.z],
+                            args.l, args.z, args.l2],
                             **injection_parameters
     )
+
 else:
     gbm_pf_file     = paths.get('t90_file')
     luminosity_file = paths.get('rest_frame_file')
-    pf_data = get_data(gbm_pf_file, type='long')[1]
+    pf_data = get_data(gbm_pf_file, type='all')[1]
     lum_data = get_luminosity_data(luminosity_file, t90_file=gbm_pf_file,
-        type='long')
+        type='all')
     data = np.array([pf_data, lum_data], dtype=object)
 
 # Plot data
+''' NEEDS FIXING '''
 if args.plot is not False:
     plot_data(data, type='peakflux')
 
 likelihood = PoissonLikelihood([redshifts,
                                 luminosities,
-                                pf_correction,
-                                pf_correction_50_300,
+                                collapsar_correction,
+                                collapsar_correction_50_300,
+                                merger_correction,
+                                merger_correction_50_300,
                                 func,
                                 dl_cm,
                                 dV_dz_Gpc3,
                                 merger_rate,
                                 NGRB,
-                                args.l, args.z],
+                                args.l, args.z, args.l2],
                                 data, GRB_Simulation
 )
 
+
 # Define Priors
-priors = make_prior(args.l, args.z)
+priors = make_prior_joint(args.l, args.z, args.l2)
 
 # Run nested sampler
 if args.run is not False:

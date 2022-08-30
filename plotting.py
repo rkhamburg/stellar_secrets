@@ -10,6 +10,8 @@ def get_bins(data_type):
         return np.logspace(-11, -2, 80)
     elif data_type == 'luminosity':
         return np.logspace(47,54,18)
+    elif data_type == 'merger luminosity':
+        return np.logspace(47,54,18)
     elif data_type == 'redshift':
         return np.logspace(-2,1,10)
     else:
@@ -57,6 +59,16 @@ def plot_detections(idx, pf, z, L):
 
 def plot_data(data, type='peakflux'):
     plt.stairs(data, edges=get_bins(type))
+    plt.xscale('log')
+    plt.show()
+    plt.close()
+    return
+
+def plot_peak_flux(pf, pf2=None):
+    bins = get_bins('peakflux')
+    plt.hist(pf, bins=bins, histtype='step')
+    if pf2 is not None:
+        plt.hist(pf2, bins=bins, histtype='step')
     plt.xscale('log')
     plt.show()
     plt.close()
