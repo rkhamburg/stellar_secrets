@@ -84,18 +84,18 @@ def GRB_Simulation(x, z0, l0, l1=None, l2=None, l3=None, z1=None, z2=None,
         type='merger luminosity')
     pf_counts_merg[pf_counts_merg==0]   = 1e-30
     lum_counts_merg[lum_counts_merg==0] = 1e-30
-    plot_data(pf_counts, type='peakflux')
-    plot_data(pf_counts_merg, type='peakflux')
+    #plot_data(pf_counts, type='peakflux')
+    #plot_data(pf_counts_merg, type='peakflux')
 
     # Add distributions together
     all_pf_counts  = pf_counts  + pf_counts_merg
     all_lum_counts = lum_counts + lum_counts_merg
-    print (np.sum(all_pf_counts), np.sum(pf_counts_merg))
+    #print (np.sum(all_pf_counts), np.sum(pf_counts_merg))
 
     # Add conditional
     if np.sum(pf_counts_merg) < 0.05 * np.sum(all_pf_counts) \
         or np.sum(pf_counts_merg) > 0.5 * np.sum(all_pf_counts):
-        print ('number of mergers not right')
+        #print ('number of mergers not right')
         nan_arr = np.empty(len(get_bins('peakflux')))
         nan_arr[:] = np.nan
         return nan_arr
