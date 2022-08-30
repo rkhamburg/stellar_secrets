@@ -213,7 +213,7 @@ likelihood = PoissonLikelihood([redshifts,
 
 
 # Define Priors
-priors = make_prior_joint(args.l, args.z, args.l2)
+priors = make_prior_joint(args.l, args.z, args.l2, minl_merg)
 
 # Run nested sampler
 if args.run is not False:

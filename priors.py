@@ -72,7 +72,7 @@ def make_prior_merger(ldist):
     return priors
 
 
-def make_prior_joint(ldist, zdist, ldist2):
+def make_prior_joint(ldist, zdist, ldist2, l2min):
     # Set up prior dict
     if ldist == 'BPL':
         priors = bilby.core.prior.PriorDict(conversion_function=condition_func)
@@ -106,11 +106,11 @@ def make_prior_joint(ldist, zdist, ldist2):
     priors['ml0'] = bilby.prior.Uniform(minimum=-3., maximum=0., name='luminosity low index', latex_label=r'$\alpha_L^M$')
 
     if ldist2 == 'CPL':
-        priors['ml2'] = bilby.prior.Uniform(minimum=47, maximum=54, name='cutoff luminosity', latex_label=r'$L_c$')
+        priors['ml2'] = bilby.prior.Uniform(minimum=l2min, maximum=54, name='cutoff luminosity', latex_label=r'$L_c$')
 
     elif ldist2 == 'BPL':
         priors['ml1'] = bilby.prior.Uniform(minimum=-4., maximum=0., name='luminosity high index', latex_label=r'$\beta_L$')
-        priors['ml2'] = bilby.prior.Uniform(minimum=47, maximum=54, name='break luminosity', latex_label=r'$L_*$')
+        priors['ml2'] = bilby.prior.Uniform(minimum=l2min, maximum=54, name='break luminosity', latex_label=r'$L_*$')
         priors['lb2'] = bilby.prior.Constraint(minimum=0, maximum=4)
 
     return priors
