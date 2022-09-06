@@ -74,29 +74,29 @@ def make_prior_merger(ldist):
 
 def make_prior_joint(ldist, zdist, ldist2, l2min):
     # Set up prior dict
-    if ldist == 'BPL':
+    if ldist == 'BPL' or ldist == 'bpl':
         priors = bilby.core.prior.PriorDict(conversion_function=condition_func)
-    elif ldist2 == 'BPL':
+    elif ldist2 == 'BPL' or ldist2 == 'bpl':
         priors = bilby.core.prior.PriorDict(conversion_function=condition_func2)
     else:
         priors = bilby.core.prior.PriorDict()
 
     # Set up default prior distributions
-    priors['z0'] = bilby.prior.Uniform(minimum=-1., maximum=2., name='local rate density', latex_label=r'$\rho_0$')
-    priors['l0'] = bilby.prior.Uniform(minimum=-3., maximum=0., name='luminosity low index', latex_label=r'$\alpha_L$')
+    priors['z0'] = bilby.prior.Uniform(minimum=-1., maximum=2., name='local rate density', latex_label=r'$\rho_0^C$')
+    priors['l0'] = bilby.prior.Uniform(minimum=-3., maximum=0., name='luminosity low index', latex_label=r'$\alpha_L^C$')
 
     # Add cut-off luminosity
-    if ldist == 'CPL':
-        priors['l2'] = bilby.prior.Uniform(minimum=49, maximum=55, name='cutoff luminosity', latex_label=r'$L_c$')
+    if ldist == 'CPL' or ldist == 'cpl':
+        priors['l2'] = bilby.prior.Uniform(minimum=49, maximum=55, name='cutoff luminosity', latex_label=r'$L_c^C$')
 
     # Add break luminosity and high-luminosity power law
-    elif ldist == 'BPL':
-        priors['l1'] = bilby.prior.Uniform(minimum=-4., maximum=0., name='luminosity high index', latex_label=r'$\beta_L$')
-        priors['l2'] = bilby.prior.Uniform(minimum=49, maximum=55, name='break luminosity', latex_label=r'$L_*$')
+    elif ldist == 'BPL' or ldist == 'bpl':
+        priors['l1'] = bilby.prior.Uniform(minimum=-4., maximum=0., name='luminosity high index', latex_label=r'$\beta_L^C$')
+        priors['l2'] = bilby.prior.Uniform(minimum=49, maximum=55, name='break luminosity', latex_label=r'$L_*^C$')
         priors['lb'] = bilby.prior.Constraint(minimum=0, maximum=4)
 
     # Add wanderman and piran redshift rate
-    if zdist == 'WP':
+    if zdist == 'WP' or zdist == 'wp':
         priors['z1'] = bilby.prior.Uniform(minimum=0, maximum=5, name='redshift low index', latex_label=r'$\alpha_z$')
         priors['z2'] = bilby.prior.Uniform(minimum=-5, maximum=0, name='redshift high index', latex_label=r'$\beta_z$')
         priors['z3'] = bilby.prior.Uniform(minimum=0., maximum=10, name='break redshift', latex_label=r'$z_*$')
@@ -105,12 +105,12 @@ def make_prior_joint(ldist, zdist, ldist2, l2min):
     priors['mz0'] = bilby.prior.Uniform(minimum=-1., maximum=3., name='local rate density (merger)', latex_label=r'$\rho_0^M$')
     priors['ml0'] = bilby.prior.Uniform(minimum=-3., maximum=0., name='luminosity low index', latex_label=r'$\alpha_L^M$')
 
-    if ldist2 == 'CPL':
-        priors['ml2'] = bilby.prior.Uniform(minimum=l2min, maximum=54, name='cutoff luminosity', latex_label=r'$L_c$')
+    if ldist2 == 'CPL' or ldist2 == 'cpl':
+        priors['ml2'] = bilby.prior.Uniform(minimum=l2min, maximum=54, name='cutoff luminosity', latex_label=r'$L_c^M$')
 
-    elif ldist2 == 'BPL':
-        priors['ml1'] = bilby.prior.Uniform(minimum=-4., maximum=0., name='luminosity high index', latex_label=r'$\beta_L$')
-        priors['ml2'] = bilby.prior.Uniform(minimum=l2min, maximum=54, name='break luminosity', latex_label=r'$L_*$')
+    elif ldist2 == 'BPL' or ldist2 == 'bpl':
+        priors['ml1'] = bilby.prior.Uniform(minimum=-4., maximum=0., name='luminosity high index', latex_label=r'$\beta_L^M$')
+        priors['ml2'] = bilby.prior.Uniform(minimum=l2min, maximum=54, name='break luminosity', latex_label=r'$L_*^M$')
         priors['lb2'] = bilby.prior.Constraint(minimum=0, maximum=4)
 
     return priors

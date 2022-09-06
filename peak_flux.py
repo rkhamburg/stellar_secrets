@@ -84,13 +84,19 @@ def GRB_Simulation(x, z0, l0, l1=None, l2=None, l3=None, z1=None, z2=None,
         type='merger luminosity')
     pf_counts_merg[pf_counts_merg==0]   = 1e-30
     lum_counts_merg[lum_counts_merg==0] = 1e-30
-    #plot_data(pf_counts, type='peakflux')
-    #plot_data(pf_counts_merg, type='peakflux')
 
     # Add distributions together
     all_pf_counts  = pf_counts  + pf_counts_merg
     all_lum_counts = lum_counts + lum_counts_merg
-    #print (np.sum(all_pf_counts), np.sum(pf_counts_merg))
+
+    # Print info about detections
+    verbose = True
+    if verbose is not False:
+        print (np.sum(all_pf_counts), np.sum(pf_counts), np.sum(pf_counts_merg))
+        print (np.sum(all_lum_counts), np.sum(lum_counts), np.sum(lum_counts_merg))
+        #plot_data(all_pf_counts, dists=[pf_counts, pf_counts_merg,], type='peakflux')
+        #plot_data(all_lum_counts, dists=[lum_counts, lum_counts_merg],type='luminosity')
+        #print_info(all_pf_counts, grb_yr, grb_yr2=mgrb_yr)
 
     # Add conditional
     if np.sum(pf_counts_merg) < 0.05 * np.sum(all_pf_counts) \
@@ -99,11 +105,6 @@ def GRB_Simulation(x, z0, l0, l1=None, l2=None, l3=None, z1=None, z2=None,
         nan_arr = np.empty(len(get_bins('peakflux')))
         nan_arr[:] = np.nan
         return nan_arr
-
-    # Print info about detections
-    verbose = False
-    if verbose is not False:
-        print_info(all_pf_counts, grb_yr, grb_yr2=mgrb_yr)
     return np.array([all_pf_counts, all_lum_counts], dtype=object)
 
 

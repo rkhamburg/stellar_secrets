@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
+import corner
 
 def get_bins(data_type):
     if data_type == 'peakflux':
@@ -57,8 +58,13 @@ def plot_detections(idx, pf, z, L):
     plt.close()
 
 
-def plot_data(data, type='peakflux'):
+def plot_data(data, dists=None, type='peakflux'):
     plt.stairs(data, edges=get_bins(type))
+    if dists is not None:
+        for d in dists:
+            plt.stairs(d, edges=get_bins(type))
+    if type == 'peakflux':
+        plt.xlim(left=0.1)
     plt.xscale('log')
     plt.show()
     plt.close()
@@ -72,4 +78,51 @@ def plot_peak_flux(pf, pf2=None):
     plt.xscale('log')
     plt.show()
     plt.close()
+    return
+
+
+
+def corner_plots(results, bins=20, map=None, medians=None, truths=None,
+    labels=None, save=False, name=None, smoothing=None, hcolor='black',
+    truth_color='tomato'):
+    """ Make corner plot of posterior results """
+
+    figure = corner.corner(results, bins=bins, smooth=smoothing,
+        truths=truths, truth_color=truth_color, color=hcolor,
+        labels=labels, label_kwargs={'fontsize':14},
+        quantiles=[0.05,0.95], show_titles=True,
+        title_quantiles=[0.05,0.5,0.95], title_kwargs={"fontsize": 14},
+        plot_datapoints=True)#, levels=[0.393, 0.86466, 0.98889], fill_contours=True)
+
+    if map is not None:
+        map = results[-1]
+    ndim = len(map)
+    axes = np.array(figure.axes).reshape((ndim, ndim))
+
+    if truths is None:
+        for i in range(ndim):
+            ax = axes[i, i]
+            #ax.axvline(map[i], color=truth_color, linestyle='--')
+            ax.axvline(medians[i], color=truth_color)
+
+        # Loop over the histograms
+        for yi in range(ndim):
+            for xi in range(yi):
+                ax = axes[yi, xi]
+                #ax.axvline(map[xi], color=truth_color, linestyle='--')
+                #ax.axhline(map[yi], color=truth_color, linestyle='--')
+                #ax.plot(map[xi], map[yi], "s", color=truth_color)
+                ax.axvline(medians[xi], color=truth_color)
+                ax.axhline(medians[yi], color=truth_color)
+                ax.plot(medians[xi], medians[yi], "s", color=truth_color)
+
+    axes = figure.axes
+    for a in range(len(axes)):
+        axes[a].tick_params(axis='x', labelsize=12)
+        axes[a].tick_params(axis='y', labelsize=12)
+
+    if save is not False:
+        plt.savefig(name+'.pdf')#, dpi=600)
+    else:
+        plt.show()
     return
